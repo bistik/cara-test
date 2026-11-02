@@ -1,0 +1,4 @@
+- A pending and a confirmed booking can coexist in the same bay (since uniqueness is on the (service_bay, status) combination, as you specified)
+- LLM did not use a custom Request class for validation
+- 404 response in body has details in the message. Use a more generic error message.
+- PUT request updated, it initially did not allow updating of status.
