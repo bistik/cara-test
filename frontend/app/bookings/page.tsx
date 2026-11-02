@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 
+import { Button } from "@/components/ui/button";
 import {
   bookingStatusClass,
   bookingsHref,
@@ -262,11 +263,16 @@ export default function BookingsPage({
 }: PageProps<"/bookings">) {
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">Bookings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Caravan service bookings, 20 per page.
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Bookings</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Caravan service bookings, 20 per page.
+          </p>
+        </div>
+        <Button size="sm" render={<Link href="/bookings/new" />}>
+          New booking
+        </Button>
       </div>
       <Suspense fallback={<TableSkeleton />}>
         <Bookings searchParams={searchParams} />

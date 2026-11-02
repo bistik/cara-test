@@ -5,10 +5,14 @@ export class ApiError extends Error {
   /** The underlying Response, so callers can inspect status/headers. */
   response: Response;
 
-  constructor(message: string, response: Response) {
+  /** The parsed JSON body when the response carried one (e.g. a 422 payload). */
+  body?: unknown;
+
+  constructor(message: string, response: Response, body?: unknown) {
     super(message);
     this.name = "ApiError";
     this.response = response;
+    this.body = body;
   }
 }
 
@@ -34,9 +38,18 @@ export async function apiFetch<T>(
   });
 
   if (!response.ok) {
+    let body: unknown;
+
+    try {
+      body = await response.json();
+    } catch {
+      // Response was not JSON; the status is all the information we have.
+    }
+
     throw new ApiError(
       `API request failed: ${response.status} ${response.statusText} (${path})`,
       response,
+      body,
     );
   }
 
