@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { z } from "zod";
 
-import { ApiError, api } from "@/lib/api";
+import { ApiError, api } from "@/api/client";
 import {
   bookingFormSchema,
   type BookingFormOutput,

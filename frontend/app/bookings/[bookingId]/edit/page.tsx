@@ -4,8 +4,9 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { BookingForm } from "@/components/bookings/booking-form";
+import { BookingDetailSkeleton } from "@/components/bookings/booking-detail-skeleton";
 import type { BookingFormValues } from "@/schemas/booking";
-import { getBooking } from "@/lib/bookings";
+import { getBooking } from "@/api/bookings";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -118,25 +119,12 @@ async function EditBooking({
   );
 }
 
-function EditSkeleton() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <div className="h-5 w-48" />
-        <div className="h-7 w-40" />
-        <div className="h-5 w-32" />
-      </div>
-      <div className="h-64 rounded-lg border bg-muted/25" />
-    </div>
-  );
-}
-
 export default function EditBookingPage({
   params,
 }: PageProps<"/bookings/[bookingId]/edit">) {
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
-      <Suspense fallback={<EditSkeleton />}>
+      <Suspense fallback={<BookingDetailSkeleton />}>
         <EditBooking params={params} />
       </Suspense>
     </div>
