@@ -3,15 +3,17 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import {
-  type Booking,
+  bookingStatusClass,
   bookingsHref,
   BOOKINGS_PER_PAGE,
   BOOKING_STATUSES,
+  formatBookingDateTime,
   listBookings,
   parsePageParam,
   parseStatusParam,
 } from "@/lib/bookings";
 import { cn } from "@/lib/utils";
+import { BookingRowActions } from "@/components/bookings/booking-row-actions";
 import {
   Table,
   TableBody,
@@ -31,30 +33,20 @@ import {
 } from "@/components/ui/pagination";
 
 const MAX_PAGE_LINKS = 5;
+const MAX_NOTES_LENGTH = 20;
+
+/** Truncate notes to a fixed character count with an ellipsis. */
+function truncateNotes(notes: string | null) {
+  if (!notes || notes.length <= MAX_NOTES_LENGTH) {
+    return notes;
+  }
+
+  return `${notes.slice(0, MAX_NOTES_LENGTH)}…`;
+}
 
 export const metadata: Metadata = {
   title: "Bookings",
 };
-
-function statusClass(status: Booking["status"]) {
-  return {
-    pending: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400",
-    confirmed:
-      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400",
-    cancelled:
-      "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-400",
-  }[status];
-}
-
-function formatDateTime(iso: string) {
-  const formatter = new Intl.DateTimeFormat("en-AU", {
-    dateStyle: "medium",
-    timeStyle: "short",
-    hour12: false,
-  });
-
-  return formatter.format(new Date(iso));
-}
 
 /** Ranges of page numbers around the current page, separated by ellipses. */
 function pageRanges(current: number, last: number): (number | null)[] {
@@ -141,6 +133,9 @@ async function Bookings({
               <TableHead>Ends</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-10">Notes</TableHead>
+              <TableHead className="w-10">
+                <span className="sr-only">Actions</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -156,29 +151,32 @@ async function Bookings({
                   </TableCell>
                   <TableCell>{booking.service_bay}</TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDateTime(booking.starts_at)}
+                    {formatBookingDateTime(booking.starts_at)}
                   </TableCell>
                   <TableCell className="whitespace-nowrap">
-                    {formatDateTime(booking.ends_at)}
+                    {formatBookingDateTime(booking.ends_at)}
                   </TableCell>
                   <TableCell>
                     <span
                       className={cn(
                         "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium capitalize",
-                        statusClass(booking.status),
+                        bookingStatusClass(booking.status),
                       )}
                     >
                       {booking.status}
                     </span>
                   </TableCell>
-                  <TableCell className="max-w-40 truncate">
-                    {booking.notes}
+                  <TableCell className="max-w-40">
+                    {truncateNotes(booking.notes)}
+                  </TableCell>
+                  <TableCell>
+                    <BookingRowActions bookingId={booking.id} />
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={9} className="h-24 text-center">
                   No bookings.
                 </TableCell>
               </TableRow>

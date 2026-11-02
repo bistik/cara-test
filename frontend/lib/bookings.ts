@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { ApiError, api } from "./api";
 
 export type BookingStatus = "pending" | "confirmed" | "cancelled";
 
@@ -9,6 +9,28 @@ export const BOOKING_STATUSES: BookingStatus[] = [
 ];
 
 export const BOOKINGS_PER_PAGE = 20;
+
+/** Tailwind classes for the status badge of a booking. */
+export function bookingStatusClass(status: BookingStatus) {
+  return {
+    pending: "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-400",
+    confirmed:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400",
+    cancelled:
+      "bg-rose-50 text-rose-700 dark:bg-rose-950 dark:text-rose-400",
+  }[status];
+}
+
+/** Format an ISO date-time string for display (e.g. `12 Feb 2026, 14:30`). */
+export function formatBookingDateTime(iso: string) {
+  const formatter = new Intl.DateTimeFormat("en-AU", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    hour12: false,
+  });
+
+  return formatter.format(new Date(iso));
+}
 
 export type Booking = {
   id: number;
@@ -95,6 +117,11 @@ export function bookingsHref(params: {
   return query ? `/bookings?${query}` : "/bookings";
 }
 
+/** Build an href for the booking detail page of the given booking. */
+export function bookingHref(bookingId: number): string {
+  return `/bookings/${bookingId}`;
+}
+
 /** List bookings, paginated 20 per page, optionally filtered by status. */
 export function listBookings(params: {
   status?: BookingStatus;
@@ -113,4 +140,27 @@ export function listBookings(params: {
   const path = `/api/v1/bookings${query ? `?${query}` : ""}`;
 
   return api.get<BookingsPage>(path);
+}
+
+/**
+ * Get a single booking. When the API answers with its own 404, the booking
+ * does not exist, so `null` is returned and the caller can render not-found.
+ * Any other error propagates to the nearest error boundary.
+ */
+export async function getBooking(bookingId: number): Promise<Booking | null> {
+  try {
+    // The show endpoint wraps the booking in a `data` key, unlike the
+    // paginated index which returns `data` as an array of bookings.
+    const { data } = await api.get<{ data: Booking }>(
+      `/api/v1/bookings/${bookingId}`,
+    );
+
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError && error.response.status === 404) {
+      return null;
+    }
+
+    throw error;
+  }
 }
