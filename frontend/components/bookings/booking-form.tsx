@@ -243,34 +243,38 @@ export function BookingForm({
         )}
       </form.Field>
 
-      <form.Field name="status">
-        {(field) => (
-          <FieldRow
-            label="Status"
-            htmlFor="status"
-            className="w-fit"
-            error={errorsFor("status")}
-          >
-            <Select
-              value={field.state.value}
-              onValueChange={(value) =>
-                field.handleChange(value as BookingStatus)
-              }
+      {/* Status is only editable on an existing booking: the create endpoint
+          defaults new bookings to `pending`. */}
+      {bookingId && (
+        <form.Field name="status">
+          {(field) => (
+            <FieldRow
+              label="Status"
+              htmlFor="status"
+              className="w-fit"
+              error={errorsFor("status")}
             >
-              <SelectTrigger id="status" className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {BOOKING_STATUSES.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {capitalize(option)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FieldRow>
-        )}
-      </form.Field>
+              <Select
+                value={field.state.value}
+                onValueChange={(value) =>
+                  field.handleChange(value as BookingStatus)
+                }
+              >
+                <SelectTrigger id="status" className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {BOOKING_STATUSES.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {capitalize(option)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </FieldRow>
+          )}
+        </form.Field>
+      )}
 
       <form.Field name="notes">
         {(field) => (

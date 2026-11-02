@@ -107,7 +107,11 @@ export async function createBooking(
   }
 
   try {
-    await api.post("/api/v1/bookings", payloadFrom(parsed.data));
+    const payload = payloadFrom(parsed.data);
+    // The create endpoint has no status field; the API defaults new
+    // bookings to `pending` (status is only editable on update).
+    delete payload.status;
+    await api.post("/api/v1/bookings", payload);
     // Ensure the listing page picks up the new booking when we redirect back.
     revalidatePath("/bookings");
 
@@ -167,6 +171,38 @@ export async function updateBooking(
       return {
         ok: false,
         message: `Could not update the booking (${error.response.status}).`,
+      };
+    }
+
+    return { ok: false, message: "Could not reach the API. Try again." };
+  }
+}
+
+export type BookingDeleteResult =
+  | { ok: true }
+  | { ok: false; message: string };
+
+/**
+ * Delete a booking via the REST API. Returns a result object instead of
+ * throwing so the client can toast the outcome. The listing is revalidated
+ * afterwards so the deleted row disappears from the table.
+ */
+export async function deleteBooking(
+  bookingId: number,
+): Promise<BookingDeleteResult> {
+  try {
+    await api.delete(`/api/v1/bookings/${bookingId}`);
+    // Ensure the listing (and detail page, in case it is cached) reflects
+    // the deletion.
+    revalidatePath("/bookings");
+    revalidatePath(`/bookings/${bookingId}`);
+
+    return { ok: true };
+  } catch (error) {
+    if (error instanceof ApiError) {
+      return {
+        ok: false,
+        message: `Could not delete the booking (${error.response.status}).`,
       };
     }
 
