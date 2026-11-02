@@ -8,15 +8,24 @@ export const metadata: Metadata = {
   title: "Booking",
 };
 
-export default async function BookingPage({
+/** Awaits the route params inside the `<Suspense>` boundary so the page
+ * prerenders its shell instead of blocking on runtime data. */
+async function BookingDetailSection({
+  params,
+}: {
+  params: PageProps<"/bookings/[bookingId]">["params"];
+}) {
+  const { bookingId } = await params;
+  return <BookingDetail bookingId={bookingId} />;
+}
+
+export default function BookingPage({
   params,
 }: PageProps<"/bookings/[bookingId]">) {
-  const { bookingId } = await params;
-
   return (
     <div className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
       <Suspense fallback={<BookingDetailSkeleton />}>
-        <BookingDetail bookingId={bookingId} />
+        <BookingDetailSection params={params} />
       </Suspense>
     </div>
   );

@@ -53,6 +53,11 @@ export async function apiFetch<T>(
     );
   }
 
+  // A 204 No Content has no body, and parsing it as JSON would throw.
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
   return (await response.json()) as T;
 }
 
