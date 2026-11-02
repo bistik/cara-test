@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { bookingHref } from "@/lib/bookings";
+import { bookingHref, bookingEditHref } from "@/lib/bookings";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,7 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { EllipsisVertical, Eye } from "lucide-react";
+import { EllipsisVertical, Eye, SquarePen } from "lucide-react";
 
 /** Row actions dropdown for a single booking in the bookings table. */
 export function BookingRowActions({ bookingId }: { bookingId: number }) {
@@ -31,6 +31,10 @@ export function BookingRowActions({ bookingId }: { bookingId: number }) {
         <DropdownMenuItem render={<Link href={bookingHref(bookingId)} />}>
           <Eye />
           View
+        </DropdownMenuItem>
+        <DropdownMenuItem render={<Link href={bookingEditHref(bookingId)} />}>
+          <SquarePen />
+          Edit
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -134,7 +134,7 @@ async function Bookings({
               <TableHead>Ends</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="w-10">Notes</TableHead>
-              <TableHead className="w-10">
+              <TableHead className="sticky right-0 z-10 w-10 border-l bg-card">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
@@ -142,7 +142,7 @@ async function Bookings({
           <TableBody>
             {data.length ? (
               data.map((booking) => (
-                <TableRow key={booking.id}>
+                <TableRow key={booking.id} className="group/row">
                   <TableCell className="font-mono text-[13px]">
                     {booking.rego}
                   </TableCell>
@@ -170,7 +170,7 @@ async function Bookings({
                   <TableCell className="max-w-40">
                     {truncateNotes(booking.notes)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="sticky right-0 z-10 border-l bg-card transition-colors group-hover/row:bg-muted/50">
                     <BookingRowActions bookingId={booking.id} />
                   </TableCell>
                 </TableRow>
@@ -270,7 +270,8 @@ export default function BookingsPage({
             Caravan service bookings, 20 per page.
           </p>
         </div>
-        <Button size="sm" render={<Link href="/bookings/new" />}>
+        {/* Renders a link, not a native <button>, so Base UI checks out. */}
+        <Button size="sm" nativeButton={false} render={<Link href="/bookings/new" />}>
           New booking
         </Button>
       </div>

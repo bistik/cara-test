@@ -122,6 +122,11 @@ export function bookingHref(bookingId: number): string {
   return `/bookings/${bookingId}`;
 }
 
+/** Build an href for the edit page of the given booking. */
+export function bookingEditHref(bookingId: number): string {
+  return `/bookings/${bookingId}/edit`;
+}
+
 /** List bookings, paginated 20 per page, optionally filtered by status. */
 export function listBookings(params: {
   status?: BookingStatus;

@@ -5,7 +5,7 @@ import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { createBooking } from "@/actions/bookings";
+import { createBooking, updateBooking } from "@/actions/bookings";
 import { BOOKING_STATUSES, type BookingStatus } from "@/lib/bookings";
 import { bookingFormSchema, type BookingFormValues } from "@/schemas/booking";
 import { cn } from "@/lib/utils";
@@ -85,11 +85,15 @@ function FieldRow({
 
 /**
  * Booking create/edit form backed by TanStack Form, validated with zod.
- * Submitted via the `createBooking` server action, which POSTs to the REST API.
+ * Submitted via the `createBooking`/`updateBooking` server actions, which
+ * POST/PUT to the REST API.
  */
 export function BookingForm({
+  bookingId,
   initialValues = DEFAULT_VALUES,
 }: {
+  /** Set when editing an existing booking, e.g. on `/bookings/<id>/edit`. */
+  bookingId?: number;
   /** Pre-filled values, e.g. when reusing this form for `/bookings/<id>/edit`. */
   initialValues?: BookingFormValues;
 }) {
@@ -103,7 +107,9 @@ export function BookingForm({
     onSubmit: async ({ value }) => {
       setServerFieldErrors({});
 
-      const result = await createBooking(value);
+      const result = bookingId
+        ? await updateBooking(bookingId, value)
+        : await createBooking(value);
 
       if (!result.ok) {
         toast.error(result.message);
@@ -113,8 +119,10 @@ export function BookingForm({
         return;
       }
 
-      toast.success("Booking created", {
-        description: "The new booking was saved.",
+      toast.success(bookingId ? "Booking updated" : "Booking created", {
+        description: bookingId
+          ? "The booking was saved."
+          : "The new booking was saved.",
       });
       // Reset before leaving: the route is static, so the client router cache
       // restores this component's state on the next visit instead of remounting.
@@ -287,7 +295,13 @@ export function BookingForm({
         <form.Subscribe selector={(state) => state.isSubmitting}>
           {(isSubmitting) => (
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Creating…" : "Create booking"}
+              {isSubmitting
+                ? bookingId
+                  ? "Saving…"
+                  : "Creating…"
+                : bookingId
+                  ? "Save changes"
+                  : "Create booking"}
             </Button>
           )}
         </form.Subscribe>
